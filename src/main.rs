@@ -3,23 +3,27 @@
 
 use core::panic::PanicInfo;
 
+mod vga_buffer;
+
 // panic function
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
-static HELLO: &[u8] = b"JimJam OS";
+static HELLO: &[u8] = b"JimJam OS - - - VERSION 0.0.01";
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
+    vga_buffer::print_something();
+
     let vga_buffer = 0xb8000 as *mut u8;
 
-    // let colorsArr = [0xe, 0xc, 0xf, 0xa];
     let mut col = 0xa;
+
     for (i, &byte) in HELLO.iter().enumerate() {
         
-        if (&[byte] == b" ") {
+        if &[byte] == b"V" {
             col = 0xc;
         }
         unsafe {
@@ -30,5 +34,4 @@ pub extern "C" fn _start() -> ! {
 
     loop {}
 }
-
 
