@@ -11,26 +11,78 @@ fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
-static HELLO: &[u8] = b"JimJam OS - - - VERSION 0.0.01";
+static greet: &[u8] = b"JimJam OS ";
+static versionText: &[u8] = b" VERSION ";
+static version: &[u8] = env!("CARGO_PKG_VERSION").as_bytes(); 
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    vga_buffer::print_something();
+    // vga_buffer::print_something();
+    use core::fmt::Write;
+    write!(vga_buffer::WRITER.lock(), "\n").unwrap();
+    write!(vga_buffer::WRITER.lock(), "\n").unwrap();
+    vga_buffer::WRITER.lock().write_str("JIMJAM OS").unwrap();
+    write!(vga_buffer::WRITER.lock(), "\n").unwrap();
+    write!(vga_buffer::WRITER.lock(), "\n").unwrap();
+    write!(vga_buffer::WRITER.lock(), "\n").unwrap();
+    vga_buffer::WRITER.lock().write_str("Hello!").unwrap();
+    write!(vga_buffer::WRITER.lock(), "\n").unwrap();
+    write!(vga_buffer::WRITER.lock(), "VGA buffer test").unwrap();
 
     let vga_buffer = 0xb8000 as *mut u8;
 
     let mut col = 0xa;
+    let mut actualI = 0;
 
-    for (i, &byte) in HELLO.iter().enumerate() {
-        
-        if &[byte] == b"V" {
-            col = 0xc;
-        }
+    for (i, &byte) in greet.iter().enumerate() {
+        actualI += 1;
         unsafe {
-            *vga_buffer.offset(i as isize * 2) = byte;
-            *vga_buffer.offset(i as isize * 2 + 1) = col;
+            *vga_buffer.offset(actualI as isize * 2) = byte;
+            *vga_buffer.offset(actualI as isize * 2 + 1) = col;
         }
     }
+    
+    // yellow line
+    col = 0xe;
+    actualI += 1;
+    unsafe {
+        *vga_buffer.offset(actualI as isize * 2) = b'-';
+        *vga_buffer.offset(actualI as isize * 2 + 1) = col;
+    }
+    actualI += 1;
+    unsafe {
+        *vga_buffer.offset(actualI as isize * 2) = b'-';
+        *vga_buffer.offset(actualI as isize * 2 + 1) = col;
+    }
+    actualI += 1;
+    unsafe {
+        *vga_buffer.offset(actualI as isize * 2) = b'-';
+        *vga_buffer.offset(actualI as isize * 2 + 1) = col;
+    }
+
+    // set to red for version text
+    col = 0xc;
+    
+    for (i, &byte) in versionText.iter().enumerate() {
+        actualI += 1;
+        unsafe {
+            *vga_buffer.offset(actualI as isize * 2) = byte;
+            *vga_buffer.offset(actualI as isize * 2 + 1) = col;
+        }
+    }
+
+    // set to blue for version number
+    col = 0x9;
+
+    for (i, &byte) in version.iter().enumerate() {
+        actualI += 1;
+        unsafe {
+            *vga_buffer.offset(actualI as isize * 2) = byte;
+            *vga_buffer.offset(actualI as isize * 2 + 1) = col;
+        }
+    }
+
+
 
     loop {}
 }
