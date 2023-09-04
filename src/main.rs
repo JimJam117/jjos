@@ -8,6 +8,8 @@ mod vga_buffer;
 // panic function
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
+    
+    println!("PANIC!: {}", _info);
     loop {}
 }
 
@@ -28,6 +30,12 @@ pub extern "C" fn _start() -> ! {
     vga_buffer::WRITER.lock().write_str("Hello!").unwrap();
     write!(vga_buffer::WRITER.lock(), "\n").unwrap();
     write!(vga_buffer::WRITER.lock(), "VGA buffer test").unwrap();
+    write!(vga_buffer::WRITER.lock(), "\n").unwrap();
+    print!("PRINT TEST");
+    print!(" - PRINT TEST 2");
+    write!(vga_buffer::WRITER.lock(), "\n").unwrap();
+    println!("Print LN test: {}","success!");
+    println!("Print LN test 2: {}","success!");
 
     let vga_buffer = 0xb8000 as *mut u8;
 
@@ -82,7 +90,7 @@ pub extern "C" fn _start() -> ! {
         }
     }
 
-
+    panic!("test complete");
 
     loop {}
 }
